@@ -1,0 +1,42 @@
+NAME
+    RDF::iCalendar - convert between RDF and iCalendar
+
+DESCRIPTION
+    This module doesn't do anything itself; it just loads
+    RDF::iCalendar::Exporter for you.
+
+  RDF::iCalendar::Exporter
+    RDF::iCalendar::Exporter takes some RDF using the W3C's iCalendar
+    vocabulary, and outputs RDF::iCalendar::Entity objects.
+
+  RDF::iCalendar::Importer
+    RDF::vCard::Importer will do the reverse, but doesn't exist yet.
+
+  RDF::iCalendar::Entity
+    An RDF::iCalendar::Entity objects is an individual iCalendar calendar.
+    It overloads stringification, so just treat it like a string.
+
+  RDF::iCalendar::Line
+    RDF::iCalendar::Line is internal fu that you probably don't want to
+    touch.
+
+BUGS
+    Please report any bugs to
+    <https://rt.cpan.org/Public/Dist/Display.html?Name=RDF-iCalendar>.
+
+SEE ALSO
+    <http://www.w3.org/TR/rdfcal/>.
+
+    <http://www.perlrdf.org/>.
+
+    RDF::vCard.
+
+AUTHOR
+    Toby Inkster <tobyink@cpan.org>.
+
+COPYRIGHT
+    Copyright 2011 Toby Inkster
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+

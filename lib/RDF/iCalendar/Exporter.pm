@@ -4,7 +4,7 @@ use 5.008;
 use base qw[RDF::vCard::Exporter];
 use common::sense;
 
-use Data::Dumper; #XXX
+use DateTime;
 use MIME::Base64 qw[];
 use RDF::iCalendar::Entity;
 use RDF::iCalendar::Line;
@@ -36,19 +36,32 @@ our %dispatch = (
 	I('organizer')   => \&_prop_export_Person,
 	IX('attendee')   => \&_prop_export_Person,
 	I('attendee')    => \&_prop_export_Person,
-	# LOCATION
-	# ATTACH
-	# CATEGORIES
-	# EXDATE
-	# EXRULE
-	# RDATE
-	# RRULE
+	I('attach')      => \&RDF::vCard::Exporter::_prop_export_binary,
+	I('dtstart')     => \&_prop_export_DateTime,
+	I('dtend')       => \&_prop_export_DateTime,
+	I('due')         => \&_prop_export_DateTime,
+	I('completed')   => \&_prop_export_DateTime,
+	I('created')     => \&_prop_export_DateTime,
+	I('dtstamp')     => \&_prop_export_DateTime,
+	I('last-modified') => \&_prop_export_DateTime,
+	IX('location')   => \&_prop_export_location,
+	I('location')    => \&_prop_export_location,
+	I('rrule')       => \&_prop_export_Recur,
+	I('exrule')      => \&_prop_export_Recur,
 	# RELATED-TO
-	# RESOURCES
 	# VALARM
 	# FREEBUSY
 	);
 
+our %list_dispatch = (
+	I('exdate')      => ['exdate',     \&_value_export_DateTime],
+	I('rdate')       => ['rdate',      \&_value_export_DateTime],
+	I('resources')   => ['resources',  \&_value_export_category],
+	I('categories')  => ['categories', \&_value_export_category],
+	I('category')    => ['categories', \&_value_export_category],
+	IX('category')   => ['categories', \&_value_export_category],
+	);
+	
 sub rebless
 {
 	my ($self, $thing) = @_;
@@ -60,6 +73,25 @@ sub rebless
 	{
 		return bless $thing, 'RDF::iCalendar::Entity';
 	}
+}
+
+sub debug
+{
+#	my ($self, @debug) = @_;
+#	printf(@debug);
+#	print "\n";
+}
+
+sub export_cards # need to really use superclass for these
+{
+	my ($self, $model, %options) = @_;	
+	return RDF::vCard::Exporter->new->export_cards($model, %options);
+}
+
+sub export_card # need to really use superclass for these
+{
+	my ($self, $model, $subject, %options) = @_;	
+	return RDF::vCard::Exporter->new->export_card($model, $subject, %options);
 }
 
 sub export_calendars
@@ -112,9 +144,11 @@ sub export_calendar
 			my $code = $cal_dispatch{$triple->predicate->uri};
 			$ical->add($code->($self, $model, $triple));
 		}
-		elsif (! $triple->object->is_blank)
+		elsif ((substr($triple->predicate->uri, 0, length(&I)) eq &I
+		or substr($triple->predicate->uri, 0, length(&IX)) eq &IX))
 		{
-			$ical->add($self->_prop_export_simple($model, $triple));
+			$ical->add($self->_prop_export_simple($model, $triple))
+				unless $triple->object->is_blank;
 		}
 	}
 			
@@ -165,25 +199,49 @@ sub export_component
 	
 	my $c = RDF::iCalendar::Entity->new( profile=>$profile );
 	
-	my %categories;
+	$self->debug("COMPONENT: %s", flatten_node($subject));
+	
+	my $lists = {};
+	
 	my $triples = $model->get_statements($subject, undef, undef);
 	while (my $triple = $triples->next)
 	{
-#		next
-#			unless (substr($triple->predicate->uri, 0, length(&I)) eq &I or
-#					  substr($triple->predicate->uri, 0, length(&IX)) eq &IX);
-
+		$self->debug("  %s %s", $triple->predicate->sse, $triple->object->sse);
+	
 		if (defined $dispatch{$triple->predicate->uri}
 		and ref($dispatch{$triple->predicate->uri}) eq 'CODE')
 		{
+			$self->debug("   -> dispatch");
 			my $code = $dispatch{$triple->predicate->uri};
 			$c->add($code->($self, $model, $triple));
 		}
-		elsif (! $triple->object->is_blank)
+		elsif (defined $list_dispatch{$triple->predicate->uri}
+		and ref($list_dispatch{$triple->predicate->uri}) eq 'ARRAY')
 		{
-			$c->add($self->_prop_export_simple($model, $triple));
+			$self->debug("   -> list_dispatch");
+			my ($listname, $code) = @{ $list_dispatch{$triple->predicate->uri} };
+			push @{ $lists->{$listname} }, $code->($self, $model, $triple);
+		}
+		elsif ((substr($triple->predicate->uri, 0, length(&I)) eq &I
+		or substr($triple->predicate->uri, 0, length(&IX)) eq &IX))
+		{
+			$self->debug("   -> default");
+			$c->add($self->_prop_export_simple($model, $triple))
+				unless $triple->object->is_blank;
+		}
+		else
+		{
+			$self->debug("   -> NO ACTION");
 		}
 	}
+	
+	foreach my $listname (keys %$lists)
+	{
+		$c->add(RDF::iCalendar::Line->new(
+			property => $listname,
+			value    => [[ sort keys %{{ map { $_ => 1 } @{$lists->{$listname}} }} ]],
+			));
+	}	
 			
 	return $c;
 }
@@ -193,6 +251,147 @@ sub _prop_export_simple
 	my ($self, $model, $triple) = @_;
 	my $rv = $self->SUPER::_prop_export_simple($model, $triple);
 	return $self->rebless($rv);
+}
+
+# iCalendar forces different datetime/date formats than
+# the generalised text/directory ones used by vCard...
+sub _prop_export_DateTime
+{
+	my ($self, $model, $triple) = @_;
+
+	my $prop = 'x-data';
+	if ($triple->predicate->uri =~ m/([^\#\/]+)$/)
+	{
+		$prop = $1;
+	}
+	
+	my $val    = undef;
+	my $params = undef;
+
+	my ($dt, $has_time) = $self->_node2dt($triple->object, $model);
+	my $tz = $dt->time_zone;
+
+	if ($dt and $has_time)
+	{
+		$params = { value=>'DATE-TIME' };
+		
+		unless ($tz->is_floating ||
+				  $tz->is_utc ||
+				  $tz->is_olson )
+		{
+			$dt = $dt->clone->set_time_zone('UTC');
+			$tz = $dt->time_zone;
+		}
+		
+		$val = sprintf('%04d%02d%02dT%02d%02d%02d',
+			$dt->year, $dt->month, $dt->day, $dt->hour, $dt->minute, $dt->second);
+		
+		if ($tz->is_utc)
+		{
+			$val .= "Z";
+		}
+		elsif (!$tz->is_floating)
+		{
+			$params->{tzid} = $tz->name;
+		}
+	}
+	elsif ($dt)
+	{
+		$params = { value=>'DATE' };
+		
+		unless ($tz->is_floating ||
+				  $tz->is_utc ||
+				  $tz->is_olson )
+		{
+			$dt = $dt->clone->set_time_zone('UTC');
+			$tz = $dt->time_zone;
+		}
+		
+		$val = sprintf('%04d%02d%02d',
+			$dt->year, $dt->month, $dt->day);
+	}
+
+	return RDF::iCalendar::Line->new(
+		property        => $prop,
+		value           => $val,
+		type_parameters => $params,
+		);
+}
+
+sub _node2dt
+{
+	my ($self, $node, $model) = @_;
+	
+	# Shouldn't happen!
+	return DateTime->now unless $node->is_literal;
+	
+	my ($date, $time) = split /T/i, $node->literal_value;	
+	my $has_time = (defined $time and length $time);
+
+	my $dt;
+	if ($date =~ m'^([0-9]{4})\-?([0-9]{2})\-?([0-9]{2})$')
+	{
+		$dt = DateTime->new(year => $1, month => $2, day => $3);
+	}
+	elsif ($date =~ m'^([0-9]{1,4})\-([0-9]{1,2})\-([0-9]{1,2})$')
+	{
+		$dt = DateTime->new(year => $1, month => $2, day => $3);
+	}
+	else
+	{
+		$dt = DateTime->now;
+	}
+	
+	my $zone;
+	if ($time =~ /^(.+)(Z|[\+\-]00\:?00])$/i)
+	{
+		$time = $1;
+		$zone = DateTime::TimeZone->new(name => 'UTC');
+	}
+	elsif ($time =~ /^(.+)([\+\-][0-9][0-9]\:?[0-9][0-9])$/i)
+	{
+		$time = $1;
+		$zone = DateTime::TimeZone->new(name => $2);
+	}
+	elsif ($node->has_datatype
+	and $node->literal_datatype =~ m'^http://www\.w3\.org/2002/12/cal/tzd/(.+)#tz$')
+	{
+		$zone = DateTime::TimeZone->new(name => $1);
+	}
+	elsif ($node->has_datatype
+	and $node->literal_datatype !~ m'^http://www\.w3\.org/2001/XMLSchema#'
+	and defined $model)
+	{
+		# Some funny datatype; let's try our best!
+		my @locations = grep
+			{ $_->is_literal }
+			$model->objects(
+				rdf_resource($node->literal_datatype),
+				rdf_resource('http://www.w3.org/2002/12/cal/prod/Ximian_NON_de8f2a9bed573980#location'),
+				rdf_resource(RDF('value')),
+				rdf_resource(RDFS('label')),
+				);
+		$zone = DateTime::TimeZone->new(name => $locations[0]->literal_value)
+			if @locations;
+	}
+
+	$dt->set_time_zone($zone) if $zone;
+
+	if ($time =~ m'^([0-2][0-9])\:?([0-5][0-9])\:?([0-6][0-9](\.[0-9]*)?)?$')
+	{
+		$dt->set_hour($1)->set_minute($2);
+		$dt->set_second($3) if defined $3;
+	}
+	elsif ($time =~ m'^([0-2]?[0-9])\:([0-5]?[0-9])\:([0-6]?[0-9](\.[0-9]*)?)$')
+	{
+		$dt->set_hour($1)->set_minute($2)->set_second($3);
+	}
+	elsif ($time =~ m'^([0-2]?[0-9])\:([0-5]?[0-9])\:?$')
+	{
+		$dt->set_hour($1)->set_minute($2);
+	}
+
+	return ($dt, $has_time);
 }
 
 sub _prop_export_contact
@@ -235,6 +434,85 @@ sub _prop_export_contact
 			altrep   => "\"$uri\"",
 			},
 		);
+}
+
+sub _prop_export_location
+{
+	my ($self, $model, $triple) = @_;
+
+	$self->debug("      Location: %s", flatten_node($triple->object));
+
+	if ($triple->object->is_literal)
+	{
+		$self->debug("       -> literal");
+		return $self->_prop_export_simple($model, $triple);
+	}
+
+	if ($model->count_statements(
+			$triple->object,
+			rdf_resource(RDF('type')),
+			rdf_resource(V('VCard')),
+			)
+	or  $model->count_statements(
+			$triple->object,
+			rdf_resource(V('fn')),
+			undef,
+			)
+		)
+	{
+		$self->debug("       -> vcard");
+		my $card = $self->export_card($model, $triple->object);
+		return RDF::iCalendar::Line->new(
+			property => 'location',
+			value    => "$card",
+			type_parameters => {
+				value => "VCARD",
+				},
+			);
+	}
+
+	elsif ($model->count_statements(
+			$triple->object,
+			rdf_resource(RDF('type')),
+			rdf_resource(V('Address')),
+			)
+	or $model->count_statements(
+			$triple->object,
+			rdf_resource(V('locality')),
+			undef,
+			)
+	or $model->count_statements(
+			$triple->object,
+			rdf_resource(V('street-address')),
+			undef,
+			)
+		)
+	{
+		$self->debug("       -> adr");
+		my $line = $self->rebless( $self->_prop_export_adr($model, $triple) );
+		$line->{property} = 'location';
+		return $line;
+	}
+
+	elsif ($model->count_statements(
+			$triple->object,
+			rdf_resource(RDF('type')),
+			rdf_resource(V('Location')),
+			)
+	or $model->count_statements(
+			$triple->object,
+			rdf_resource(V('latitude')),
+			undef,
+			)
+		)
+	{
+		$self->debug("       -> geo");
+		my $line = $self->rebless( $self->SUPER::_prop_export_geo($model, $triple) );
+		$line->{property} = 'location';
+		return $line;
+	}
+
+	return $self->_prop_export_simple($model, $triple);
 }
 
 
@@ -402,6 +680,8 @@ sub _prop_export_Person
 	$params{'rsvp'} = flatten_node($rsvp)
 		if (defined $rsvp and $property eq 'attendee');
 
+	$params{'value'} = 'CAL-ADDRESS';
+
 	if (!$email)
 	{
 		$email = $name;
@@ -415,5 +695,206 @@ sub _prop_export_Person
 		);
 }
 
+sub _value_export_simple
+{
+	my ($self, $model, $triple) = @_;
+	my $rv = $self->_prop_export_simple($model, $triple);
+	return $rv->_unescape_value($rv->value_to_string);
+}
+
+sub _value_export_DateTime
+{
+	my ($self, $model, $triple) = @_;
+	my $rv = $self->_prop_export_DateTime($model, $triple);
+	return $rv->_unescape_value($rv->value_to_string);
+}
+
+sub _value_export_category
+{
+	my ($self, $model, $triple) = @_;
+
+	if ($triple->object->is_literal)
+	{
+		return uc $triple->object->literal_value;
+	}
+
+	my @labels = grep
+		{ $_->is_literal }
+		$model->objects_for_predicate_list(
+			$triple->object,
+			rdf_resource('http://www.w3.org/2004/02/skos/core#prefLabel'),
+			rdf_resource('http://www.holygoat.co.uk/owl/redwood/0.1/tags/name'),
+			rdf_resource('http://www.w3.org/2000/01/rdf-schema#label'),
+			rdf_resource('http://www.w3.org/2004/02/skos/core#altLabel'),
+			rdf_resource('http://www.w3.org/2004/02/skos/core#notation'),
+			rdf_resource(RDF('value')),
+			);
+	
+	if (@labels)
+	{
+		return uc $labels[0]->literal_value;
+	}
+	elsif ($triple->object->is_resource)
+	{
+		return $triple->object->uri;
+	}
+}
+
+sub _prop_export_Recur
+{
+	my ($self, $model, $triple) = @_;
+
+	my $prop = 'x-data';
+	if ($triple->predicate->uri =~ m/([^\#\/]+)$/)
+	{
+		$prop = $1;
+	}
+
+	if ($triple->object->is_literal)
+	{
+		return $self->_prop_export_simple($model, $triple);
+	}
+	
+	my (%bits, @bits);
+	
+	my $iter = $model->get_statements($triple->object, undef, undef);
+	while (my $st = $iter->next)
+	{
+		if ($st->predicate->uri =~ m'^http://www\.w3\.org/2002/12/cal/icaltzd#(.+)$')
+		{
+			my $p = uc $1;
+			my $v = ($p eq 'UNITL') ? $self->_value_export_DateTime($model, $st) : flatten_node($st->object);
+			push @{ $bits{$p} }, $v;
+		}
+	}
+	
+	while (my ($k, $v) = each %bits)
+	{
+		push @bits, sprintf('%s=%s', $k, join(',', @$v));
+	}
+	
+	return RDF::iCalendar::Line->new(
+		property => $prop,
+		value    => [ map { [ split /,/, $_ ] } @bits ],
+		type_parameters => { value => 'RECUR' },
+		);
+}
+
 
 1;
+
+__END__
+
+=head1 NAME
+
+RDF::iCalendar::Exporter - export RDF data to iCalendar format
+
+=head1 SYNOPSIS
+
+ use RDF::iCalendar;
+ 
+ my $input    = "http://example.com/calendar-data.ics";
+ my $exporter = RDF::iCalendar::Exporter->new;
+ 
+ print $_ foreach $exporter->export_calendars($input);
+
+=head1 DESCRIPTION
+
+This module reads RDF and writes iCalendar files.
+
+This is a subclass of RDF::vCard::Exporter, so it can also export vCards.
+
+=head2 Constructor
+
+=over
+
+=item * C<< new(%options) >>
+
+Returns a new RDF::iCalendar::Exporter object.
+
+There are no valid options at the moment - the hash is reserved
+for future use.
+
+=back
+
+=head2 Methods
+
+=over
+
+=item * C<< export_calendars($input, %options) >>
+
+Returns a list of iCalendars found in the input, in no particular order.
+
+The input may be a URI, file name, L<RDF::Trine::Model> or anything else
+that can be handled by the C<rdf_parse> method of L<RDF::TrineShortcuts>.
+
+Each item in the list returned is an L<RDF::iCalendar::Entity>, though
+that class overloads stringification, so you can just treat each item
+as a string mostly.
+
+=item * C<< export_calendar($input, $subject, %options) >>
+
+As per C<export_calendars> but exports just a single calendar.
+
+The subject provided must be an RDF::Trine::Node::Blank or
+RDF::Trine::Node::Resource of type icaltzd:Vcalendar.
+
+=item * C<< export_component($input, $subject, %options) >>
+
+Exports a component from a calendar - e.g. a single VEVENT
+
+The subject provided must be an RDF::Trine::Node::Blank or
+RDF::Trine::Node::Resource of type icaltzd:Vevent, icaltzd:Vtodo
+or similar.
+
+=item * C<< export_cards($input, %options) >>
+
+See L<RDF::vCard::Exporter>.
+
+=item * C<< export_card($input, $subject, %options) >>
+
+See L<RDF::vCard::Exporter>.
+
+=back
+
+=head2 RDF Input
+
+Input is expected to use the newer of the 2005 revision of the W3C's
+vCard vocabulary L<http://www.w3.org/TR/rdfcal/>. (Note that even
+though this was revised in 2005, the term URIs include "2002" in
+them.)
+
+Some extensions from the namespace L<http://buzzword.org.uk/rdf/icaltzdx#>
+are also supported. 
+
+=head2 iCalendar Output
+
+The output of this module aims at iCalendar (RFC 2445) compliance.
+In the face of weird input data though, (e.g. an DTSTART property that is a
+URI instead of a literal) it can pretty easily descend into exporting
+junk, non-compliant iCalendars.
+
+The output has barely been tested in any iCalendar-supporting software,
+so beware.
+
+=head1 SEE ALSO
+
+L<RDF::iCalendar>.
+
+L<RDF::vCard>, L<HTML::Microformats>, L<RDF::TrineShortcuts>.
+
+L<http://www.w3.org/TR/rdfcal/>.
+
+L<http://www.perlrdf.org/>.
+
+=head1 AUTHOR
+
+Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
+
+=head1 COPYRIGHT
+
+Copyright 2011 Toby Inkster
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+

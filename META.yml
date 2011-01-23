@@ -1,0 +1,51 @@
+---
+abstract: 'convert between RDF and iCalendar'
+author:
+  - 'Toby Inkster <tobyink@cpan.org>'
+build_requires:
+  ExtUtils::MakeMaker: 6.42
+  Module::Signature: 0.66
+  Test::More: 0.61
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
+distribution_type: module
+generated_by: 'Module::Install version 1.00'
+keywords:
+  - RDF
+  - Semantic
+  - Web
+  - SemWeb
+  - vCalendar
+  - iCalendar
+  - iCal
+  - Directory
+  - Event
+  - Todo
+  - hCalendar
+  - hCal
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: RDF-iCalendar
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  DateTime: 0
+  MIME::Base64: 0
+  RDF::Trine: 0.130
+  RDF::TrineShortcuts: 0.100
+  RDF::vCard: 0.004
+  Scalar::Util: 0
+  URI: 0
+  common::sense: 0
+  namespace::clean: 0
+  perl: 5.8.0
+resources:
+  bugtracker: http://rt.cpan.org/Dist/Display.html?Queue=RDF-iCalendar
+  homepage: http://search.cpan.org/dist/RDF-iCalendar/
+  license: http://dev.perl.org/licenses/
+  repository: http://goddamn.co.uk/viewvc/perlmods/RDF-iCalendar/
+version: 0.001

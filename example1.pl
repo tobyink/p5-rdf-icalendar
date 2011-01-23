@@ -8,7 +8,6 @@ use RDF::TrineShortcuts;
 use RDF::iCalendar::Exporter;
 
 my $hcalendar = <<'HTML';
-<div class="vcalendar">
 
   <div class="vevent">
     <h1 class="uid" id="xmas">
@@ -27,7 +26,7 @@ my $hcalendar = <<'HTML';
       </span>
       (<span class="adr><span class="region">North Pole</span></span>)
     </div>
-	 <p class=geo>12;34</p>
+	 <p class="location geo">12;34</p>
   </div>
   
     <div class="vtodo">
@@ -36,6 +35,7 @@ my $hcalendar = <<'HTML';
       to <span class="summary">buy everyone their presents</span> before the
       shops shut on <abbr class="due" title="2008-12-24T16:00:00">Christmas
       Eve</abbr>!
+      <a class="attach" rel="enclosure" href="data:,Perl%20is%20good">attachment</a>
     </div>
     
     <div class="vevent">
@@ -45,6 +45,17 @@ my $hcalendar = <<'HTML';
       <abbr class="dtstart" title="2003-12-25T13:00:00Z">1pm for the last
       few years</abbr>.</p>
       <p><span class="attendee">Everyone</span>'s invited.</p>
+      <i class="category">Foo</i>
+      <i class="category">Bar</i>
+      <i class="category">Baz</i>
+      <a rel="tag" href="/tag/Foo">Foo</a>
+		<div class="location vcard">
+			 <p class="adr">
+				<span class="fn extended-address">Jones Household</span>
+				<span class="locality">Lewes</span>
+				<span class="region">East Sussex</span>
+			 </p>
+		 </div>
     </div>
   
   <div class="vevent">
@@ -62,13 +73,32 @@ my $hcalendar = <<'HTML';
 			<a class="fn email" href="mailto:bob@example.net">Bob Jones</a>
 		</span>
 	 </p>
+	 <p class="location adr">
+		<span class="locality">Lewes</span>
+		<span class="region">East Sussex</span>
+	 </p>
   </div>
   
+  <div class="vevent">
+  <p>Our organisation has been offering a series of <span class="summary"
+  >summer lectures</span> since
+  <abbr class="dtstart" title="19970105T083000">January 1997</abbr>. They
+are
+  <span class="rrule">
+    held <span class="freq">yearly</span>,
+    every <span class="interval">2</span>nd year (1999, 2001, etc),
+    every <span class="byday">Sunday</span>
+    in January <abbr class="bymonth" title="1" style="display:none"></abbr>
+    at <span class="byhour">8</span>:<span class="byminute">30</span> and
+    repeated at <span class="byhour">9</span>:30.
+  </span>
+</p>
 </div>
+
 HTML
 
 my $doc = HTML::Microformats->new_document($hcalendar, 'http://hcal.example.net/')->assume_all_profiles;
-print rdf_string($doc->model =>'Turtle');
+print rdf_string($doc->model =>'RDFXML');
 print "========\n";
 my @cals = RDF::iCalendar::Exporter->new->export_calendars($doc->model);
 print "========\n";
