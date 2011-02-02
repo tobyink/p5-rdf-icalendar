@@ -9,6 +9,11 @@ use RDF::iCalendar::Exporter;
 
 my $hcalendar = <<'HTML';
 
+	<div class="hentry" id="fooble">
+		<span class="entry-title">Foo</span>
+		<span class="published">2011-02-02</span>
+	</div>
+
   <div class="vevent">
     <h1 class="uid" id="xmas">
       <span class="summary">Christmas</span> Schedule
