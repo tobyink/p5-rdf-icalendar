@@ -48,4 +48,5 @@ resources:
   homepage: http://search.cpan.org/dist/RDF-iCalendar/
   license: http://dev.perl.org/licenses/
   repository: http://goddamn.co.uk/viewvc/perlmods/RDF-iCalendar/
-version: 0.001
+version: 0.002
+

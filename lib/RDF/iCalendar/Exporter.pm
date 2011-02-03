@@ -22,7 +22,7 @@ sub XSD  { return 'http://www.w3.org/2001/XMLSchema#' . shift; }
 
 use namespace::clean;
 
-our $VERSION = '0.000_00';
+our $VERSION = '0.002';
 our $PRODID  = sprintf("+//IDN cpan.org//NONSGML %s v %s//EN", __PACKAGE__, $VERSION);
 
 our %cal_dispatch = (
@@ -48,9 +48,9 @@ our %dispatch = (
 	I('location')    => \&_prop_export_location,
 	I('rrule')       => \&_prop_export_Recur,
 	I('exrule')      => \&_prop_export_Recur,
+	I('valarm')      => \&_prop_export_valarm,
+	I('freebusy')    => \&_prop_export_freebusy,
 	# RELATED-TO
-	# VALARM
-	# FREEBUSY
 	);
 
 our %list_dispatch = (
@@ -142,7 +142,11 @@ sub export_calendar
 		and    ref($cal_dispatch{$triple->predicate->uri}) eq 'CODE')
 		{
 			my $code = $cal_dispatch{$triple->predicate->uri};
-			$ical->add($code->($self, $model, $triple));
+			my $r    = $code->($self, $model, $triple);
+			if (blessed($r) and $r->isa('RDF::iCalendar::Line'))
+				{ $ical->add($r); }
+			elsif (blessed($r) and $r->isa('RDF::iCalendar::Entity'))
+				{ $ical->add_component($r); }
 		}
 		elsif ((substr($triple->predicate->uri, 0, length(&I)) eq &I
 		or substr($triple->predicate->uri, 0, length(&IX)) eq &IX))
@@ -213,7 +217,11 @@ sub export_component
 		{
 			$self->debug("   -> dispatch");
 			my $code = $dispatch{$triple->predicate->uri};
-			$c->add($code->($self, $model, $triple));
+			my $r    = $code->($self, $model, $triple);
+			if (blessed($r) and $r->isa('RDF::iCalendar::Line'))
+				{ $c->add($r); }
+			elsif (blessed($r) and $r->isa('RDF::iCalendar::Entity'))
+				{ $c->add_component($r); }
 		}
 		elsif (defined $list_dispatch{$triple->predicate->uri}
 		and ref($list_dispatch{$triple->predicate->uri}) eq 'ARRAY')
@@ -244,6 +252,16 @@ sub export_component
 	}	
 			
 	return $c;
+}
+
+sub _prop_export_valarm
+{
+	my ($self, $model, $triple) = @_;
+	
+	unless ($triple->object->is_literal)
+	{
+		return $self->export_component($model, $triple->object);
+	}
 }
 
 sub _prop_export_simple
@@ -778,6 +796,46 @@ sub _prop_export_Recur
 		value    => [ map { [ split /,/, $_ ] } @bits ],
 		type_parameters => { value => 'RECUR' },
 		);
+}
+
+sub _prop_export_freebusy
+{
+	my ($self, $model, $triple) = @_;
+
+	if ($triple->object->is_literal)
+	{
+		return RDF::iCalendar::Line->new(
+			property => 'freebusy',
+			value    => $triple->object->literal_value,
+			type_parameters => { fbtype => 'BUSY' },
+			);
+	}
+
+	my @values = sort map
+		{ $_->literal_value }
+		grep
+		{ $_->is_literal }
+		$model->objects_for_predicate_list(
+			$triple->object,
+			rdf_resource(RDF('value')),
+			);
+	
+	my ($fbtype) = map
+		{ uc $_->literal_value }
+		grep
+		{ $_->is_literal }
+		$model->objects_for_predicate_list(
+			$triple->object,
+			rdf_resource(I('fbtype')),
+			rdf_resource(IX('fbtype')),
+			);
+
+	return RDF::iCalendar::Line->new(
+		property => 'freebusy',
+		value    => [[ @values ]],
+		type_parameters => { fbtype => $fbtype || 'BUSY' },
+		);
+
 }
 
 

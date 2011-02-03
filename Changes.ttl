@@ -28,6 +28,8 @@ my:v_0-001
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.001.tar.gz> ;
 	rdfs:label      "First release"@en .
 
+# VALARM, VJOURNAL and VFREEBUSY
+
 #############################################################
 
 my:project

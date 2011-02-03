@@ -11,7 +11,16 @@ my $hcalendar = <<'HTML';
 
 	<div class="hentry" id="fooble">
 		<span class="entry-title">Foo</span>
-		<span class="published">2011-02-02</span>
+		<span class="published updated">2011-02-02</span>
+	</div>
+	
+	<div class="vfreebusy">
+		<b class="summary">I'm busy some times</b>
+		<i class="freebusy">
+			<u class="fbtype">busy</u>
+			<b class="value">19980415T133000Z/19980415T170000Z</b>
+			<b class="value">19990415T133000Z/19990415T170000Z</b>
+		</i>
 	</div>
 
   <div class="vevent">
@@ -41,6 +50,10 @@ my $hcalendar = <<'HTML';
       shops shut on <abbr class="due" title="2008-12-24T16:00:00">Christmas
       Eve</abbr>!
       <a class="attach" rel="enclosure" href="data:,Perl%20is%20good">attachment</a>
+		<div class="valarm">
+			<span class="summary">Reminder!</span>
+			<span class="trigger">-PT12H</span>
+		</div>
     </div>
     
     <div class="vevent">

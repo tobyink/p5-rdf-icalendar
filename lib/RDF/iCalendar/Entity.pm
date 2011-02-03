@@ -4,6 +4,8 @@ use 5.008;
 use base qw[RDF::vCard::Entity];
 use common::sense;
 
+our $VERSION = '0.002';
+
 1;
 
 
