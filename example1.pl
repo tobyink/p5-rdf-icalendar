@@ -116,8 +116,12 @@ are
 HTML
 
 my $doc = HTML::Microformats->new_document($hcalendar, 'http://hcal.example.net/')->assume_all_profiles;
-print rdf_string($doc->model =>'RDFXML');
-print "========\n";
-my @cals = RDF::iCalendar::Exporter->new->export_calendars($doc->model);
-print "========\n";
-print $_ foreach @cals ;
+my @objects = $doc->objects('hCalendar');
+print $objects[0]->to_icalendar;
+
+#print rdf_string($doc->model =>'RDFXML');
+#print "========\n";
+#my @cals = RDF::iCalendar::Exporter->new->export_calendars($doc->model);
+#print "========\n";
+#print $_ foreach @cals ;
+

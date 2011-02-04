@@ -28,7 +28,19 @@ my:v_0-001
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.001.tar.gz> ;
 	rdfs:label      "First release"@en .
 
-# VALARM, VJOURNAL and VFREEBUSY
+my:v_0-002
+
+	a               :Version ;
+	dc:issued       "2011-02-04"^^xsd:date ;
+	:revision       "0.002"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.002.tar.gz> ;
+	dcs:changeset [
+		dcs:versus my:v_0-001 ;
+		dcs:item   [ rdfs:label "Minor bugfixes and cleanups." ; a dcs:Bugfix ] ; 
+		dcs:item   [ rdfs:label "Support for VALARM." ; a dcs:Addition ] ; 
+		dcs:item   [ rdfs:label "Support for VJOURNAL." ; a dcs:Addition ] ; 
+		dcs:item   [ rdfs:label "Support for VFREEBUSY." ; a dcs:Addition ] 
+		] .
 
 #############################################################
 
@@ -48,7 +60,7 @@ my:project
 	:tester         toby:i ;
 	:created        "2011-01-21"^^xsd:date ;
 	:license        <http://dev.perl.org/licenses/> ;
-	:release        my:v_0-001 .
+	:release        my:v_0-001 , my:v_0-002 .
 
 #############################################################
 

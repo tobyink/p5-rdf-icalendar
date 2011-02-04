@@ -1,7 +1,8 @@
-Still to do:
+* Still to do:
 
-	- VTIMEZONE
+	- VTIMEZONE entities
+	- RELATED-TO properties
 
-Need to do more testing and polishing.
+* Need to do more testing and polishing.
 
-And of course iCalendar -> RDF.
+* And of course iCalendar -> RDF.
