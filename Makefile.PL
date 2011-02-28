@@ -17,7 +17,6 @@ license             'perl';
 requires            'common::sense'       => 0;
 requires            'DateTime'            => 0;
 requires            'MIME::Base64'        => 0;
-test_requires       'Module::Signature'   => '0.66';
 requires            'namespace::clean'    => 0;
 requires            'RDF::Trine'          => '0.130';
 requires            'RDF::TrineShortcuts' => '0.100';
