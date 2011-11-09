@@ -1,7 +1,7 @@
 package RDF::iCalendar::Exporter;
 
 use 5.008;
-use base qw[RDF::vCard::Exporter];
+use parent qw[RDF::vCard::Exporter];
 use common::sense;
 
 use DateTime;
