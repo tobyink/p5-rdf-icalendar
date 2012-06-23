@@ -1,8 +1,8 @@
 package RDF::iCalendar::Entity;
 
 use 5.008;
-use parent qw[RDF::vCard::Entity];
-use common::sense;
+use base qw[RDF::vCard::Entity];
+use strict;
 
 our $VERSION = '0.002';
 

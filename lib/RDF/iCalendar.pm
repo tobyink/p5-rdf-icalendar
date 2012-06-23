@@ -1,7 +1,7 @@
 package RDF::iCalendar;
 
 use 5.008;
-use common::sense;
+use strict;
 use RDF::iCalendar::Exporter;
 use RDF::iCalendar::Importer;
 

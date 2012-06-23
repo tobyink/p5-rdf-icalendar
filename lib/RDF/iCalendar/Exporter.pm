@@ -1,14 +1,14 @@
 package RDF::iCalendar::Exporter;
 
 use 5.008;
-use parent qw[RDF::vCard::Exporter];
-use common::sense;
+use base qw[RDF::vCard::Exporter];
+use strict;
 
 use DateTime;
 use MIME::Base64 qw[];
 use RDF::iCalendar::Entity;
 use RDF::iCalendar::Line;
-use RDF::TrineShortcuts qw[:all];
+use RDF::TrineX::Functions -shortcuts;
 use Scalar::Util qw[blessed];
 use URI;
 

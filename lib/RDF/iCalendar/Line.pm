@@ -1,8 +1,8 @@
 package RDF::iCalendar::Line;
 
 use 5.008;
-use parent qw[RDF::vCard::Line];
-use common::sense;
+use base qw[RDF::vCard::Line];
+use strict;
 
 our $VERSION = '0.002';
 
