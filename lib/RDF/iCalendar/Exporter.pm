@@ -8,7 +8,10 @@ use DateTime;
 use MIME::Base64 qw[];
 use RDF::iCalendar::Entity;
 use RDF::iCalendar::Line;
-use RDF::TrineX::Functions -shortcuts;
+use RDF::TrineX::Functions
+	-shortcuts,
+	statement => { -as => 'rdf_statement' },
+	iri       => { -as => 'rdf_resource' };
 use Scalar::Util qw[blessed];
 use URI;
 
@@ -20,9 +23,16 @@ sub V    { return 'http://www.w3.org/2006/vcard/ns#' . shift; }
 sub VX   { return 'http://buzzword.org.uk/rdf/vcardx#' . shift; }
 sub XSD  { return 'http://www.w3.org/2001/XMLSchema#' . shift; }
 
+sub flatten_node
+{
+	my $node = shift;
+	return $node->value if $node->is_resource || $node->is_literal;
+	return $node->as_ntriples;
+}
+
 use namespace::clean;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 our $PRODID  = sprintf("+//IDN cpan.org//NONSGML %s v %s//EN", __PACKAGE__, $VERSION);
 
 our %cal_dispatch = (

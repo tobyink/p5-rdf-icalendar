@@ -5,7 +5,7 @@ use strict;
 use RDF::iCalendar::Exporter;
 use RDF::iCalendar::Importer;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 1;
 

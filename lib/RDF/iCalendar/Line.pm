@@ -4,7 +4,7 @@ use 5.008;
 use base qw[RDF::vCard::Line];
 use strict;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 1;
 
