@@ -37,6 +37,8 @@ my:v_0-003
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.003.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0-002 ;
+		dcs:item   [ rdfs:label "Drop some dependencies." ] ;
+		dcs:item   [ rdfs:label "Various minor cleanups." ] ;
 		dcs:item   [ rdfs:label "Module::Package::RDF." ; a dcs:Packaging ] 
 	] .
 
