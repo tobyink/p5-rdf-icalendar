@@ -1,5 +1,3 @@
-#############################################################
-
 @prefix :        <http://usefulinc.com/ns/doap#> .
 @prefix dcs:     <http://ontologi.es/doap-changeset#> .
 @prefix dc:      <http://purl.org/dc/terms/> .
@@ -9,27 +7,16 @@
 @prefix toby:    <http://tobyinkster.co.uk/#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 
-#############################################################
-
-<>
-
-	dc:title         "Changes" ;
-	dc:description   "Revision history for Perl extension RDF::iCalendar."@en ;
-	dc:subject       my:project ;
-	dc:creator       toby:i .
-
-#############################################################
-
+my:project :release my:v_0-001 .
 my:v_0-001
-
 	a               :Version ;
 	dc:issued       "2011-01-23"^^xsd:date ;
 	:revision       "0.001"^^xsd:string ;
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.001.tar.gz> ;
 	rdfs:label      "First release"@en .
 
+my:project :release my:v_0-002 .
 my:v_0-002
-
 	a               :Version ;
 	dc:issued       "2011-02-04"^^xsd:date ;
 	:revision       "0.002"^^xsd:string ;
@@ -40,37 +27,16 @@ my:v_0-002
 		dcs:item   [ rdfs:label "Support for VALARM." ; a dcs:Addition ] ; 
 		dcs:item   [ rdfs:label "Support for VJOURNAL." ; a dcs:Addition ] ; 
 		dcs:item   [ rdfs:label "Support for VFREEBUSY." ; a dcs:Addition ] 
-		] .
+	] .
 
-#############################################################
+my:project :release my:v_0-003 .
+my:v_0-003
+	a               :Version ;
+	dc:issued       "2011-02-04"^^xsd:date ;
+	:revision       "0.003"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.003.tar.gz> ;
+	dcs:changeset [
+		dcs:versus my:v_0-002 ;
+		dcs:item   [ rdfs:label "Module::Package::RDF." ; a dcs:Packaging ] 
+	] .
 
-my:project
-
-	a               :Project ;
-	:name           "RDF-iCalendar" ;
-	:shortdesc      "convert between RDF and iCalendar"@en ;
-	:programming-language  "Perl" ;
-	:homepage       <https://metacpan.org/release/RDF-iCalendar> ;
-	:download-page  <https://metacpan.org/release/RDF-iCalendar> ;
-	:bug-database   <http://rt.cpan.org/Dist/Display.html?Queue=RDF-iCalendar> ;
-	:repository     [ a :SVNRepository ; :browse <http://goddamn.co.uk/svn-web/perlmods/browse/RDF-iCalendar/> ] ;
-	:maintainer     toby:i ;
-	:developer      toby:i ;
-	:documenter     toby:i ;
-	:tester         toby:i ;
-	:created        "2011-01-21"^^xsd:date ;
-	:license        <http://dev.perl.org/licenses/> ;
-	:release        my:v_0-001 , my:v_0-002 .
-
-#############################################################
-
-toby:i
-
-	a               foaf:Person ;
-	foaf:name       "Toby Inkster" ;
-	foaf:homepage   <http://tobyinkster.co.uk/> ;
-	foaf:page       <https://metacpan.org/author/TOBYINK> ;
-	foaf:mbox       <mailto:tobyink@cpan.org> ;
-	<http://www.w3.org/2002/07/owl#sameAs> <http://purl.org/NET/cpan-uri/person/tobyink> .
-
-#############################################################
