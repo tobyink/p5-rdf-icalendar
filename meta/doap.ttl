@@ -15,7 +15,7 @@ my:project
 	:homepage       <https://metacpan.org/release/RDF-iCalendar>;
 	:download-page  <https://metacpan.org/release/RDF-iCalendar>;
 	:bug-database   <http://rt.cpan.org/Dist/Display.html?Queue=RDF-iCalendar>;
-	:repository     [ a :HgRepository; :browse <https://bitbucket.org/tobyink/p5-rdf-icalendar> ];
+	:repository     [ a :GitRepository; :browse <https://github.com/tobyink/p5-rdf-icalendar> ];
 	:maintainer     toby:i;
 	:developer      toby:i;
 	:documenter     toby:i;
