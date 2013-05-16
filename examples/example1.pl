@@ -1,8 +1,3 @@
-use lib "lib";
-use lib "../p5-html-html5-parser/lib";
-use lib "../p5-html-microformats/lib";
-use lib "../p5-rdf-vcard/lib";
-
 use HTML::Microformats;
 use RDF::TrineX::Functions -shortcuts;
 use RDF::iCalendar::Exporter;
