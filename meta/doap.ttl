@@ -10,7 +10,7 @@
 my:project
 	a               :Project;
 	:name           "RDF-iCalendar";
-	:shortdesc      "convert between RDF and iCalendar"@en;
+	:shortdesc      "convert from RDF to iCalendar"@en;
 	:programming-language  "Perl";
 	:homepage       <https://metacpan.org/release/RDF-iCalendar>;
 	:download-page  <https://metacpan.org/release/RDF-iCalendar>;
