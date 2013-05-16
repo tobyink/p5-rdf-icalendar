@@ -42,3 +42,17 @@ my:v_0-003
 		dcs:item   [ rdfs:label "Module::Package::RDF." ; a dcs:Packaging ] 
 	] .
 
+my:project :release my:v_0-004 .
+my:v_0-004
+	a               :Version ;
+	dc:issued       "2013-05-17"^^xsd:date ;
+	:revision       "0.004"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-iCalendar-0.004.tar.gz> ;
+	dcs:changeset [
+		dcs:versus my:v_0-003 ;
+		dcs:item   [ a dcs:Bugfix; rdfs:label "Stop claiming to be able to convert between RDF and iCalendar; right now it's only one-way."; dcs:fixes RT#85190; dcs:thanks cpan:JONASS ] ;
+		dcs:item   [ a dcs:Bugfix; rdfs:label "Explicitly require RDF::vCard."; dcs:fixes RT#85188; dcs:thanks cpan:JONASS ] ;
+		dcs:item   [ a dcs:Bugfix; rdfs:label "Remove references to paths on TOBYINK's local computer from example script."; dcs:fixes RT#78050; dcs:thanks cpan:JONASS ] ;
+		dcs:item   [ a dcs:Addition; rdfs:label "Add a vaguely decent test case." ] ;
+	] .
+

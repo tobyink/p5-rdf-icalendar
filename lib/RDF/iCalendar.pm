@@ -6,7 +6,7 @@ use RDF::iCalendar::Exporter;
 
 BEGIN {
 	$RDF::iCalendar::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::iCalendar::VERSION   = '0.003';
+	$RDF::iCalendar::VERSION   = '0.004';
 }
 
 1;
