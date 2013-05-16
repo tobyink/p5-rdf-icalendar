@@ -15,6 +15,8 @@ use RDF::TrineX::Functions
 use Scalar::Util qw[blessed];
 use URI;
 
+require RDF::vCard;
+
 # kinda constants
 sub I    { return 'http://www.w3.org/2002/12/cal/icaltzd#' . shift; }
 sub IX   { return 'http://buzzword.org.uk/rdf/icaltzdx#' . shift; }
