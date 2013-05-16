@@ -15,7 +15,7 @@ __END__
 
 =head1 NAME
 
-RDF::iCalendar - convert between RDF and iCalendar
+RDF::iCalendar - convert from RDF to iCalendar
 
 =head1 DESCRIPTION
 
