@@ -2,6 +2,8 @@ package RDF::iCalendar;
 
 use 5.008;
 use strict;
+use warnings;
+no warnings qw(uninitialized);
 use RDF::iCalendar::Exporter;
 
 BEGIN {

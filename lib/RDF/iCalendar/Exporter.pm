@@ -3,6 +3,8 @@ package RDF::iCalendar::Exporter;
 use 5.008;
 use base qw[RDF::vCard::Exporter];
 use strict;
+use warnings;
+no warnings qw(uninitialized);
 
 use DateTime;
 use MIME::Base64 qw[];

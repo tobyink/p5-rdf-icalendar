@@ -3,6 +3,8 @@ package RDF::iCalendar::Line;
 use 5.008;
 use base qw[RDF::vCard::Line];
 use strict;
+use warnings;
+no warnings qw(uninitialized);
 
 our $VERSION = '0.005';
 
