@@ -56,3 +56,10 @@ my:v_0-004
 		dcs:item   [ a dcs:Addition; rdfs:label "Add a vaguely decent test case." ] ;
 	] .
 
+
+`RDF-iCalendar 0.005 cpan:TOBYINK`
+	issued    2014-09-17;
+	changeset [
+		item "Switch to Dist::Inkt."^^Packaging;
+	].
+

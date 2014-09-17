@@ -34,7 +34,7 @@ sub flatten_node
 
 use namespace::clean;
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 our $PRODID  = sprintf("+//IDN cpan.org//NONSGML %s v %s//EN", __PACKAGE__, $VERSION);
 
 our %cal_dispatch = (
