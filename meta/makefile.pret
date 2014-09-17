@@ -1,6 +1,7 @@
 @prefix deps:  <http://ontologi.es/doap-deps#> .
 
 <http://purl.org/NET/cpan-uri/dist/RDF-iCalendar/project>
+	deps:runtime-requirement         [ deps:on "perl 5.008"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "DateTime"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "RDF::vCard 0.010"^^deps:CpanId ];
 	deps:test-requirement            [ deps:on "Test::More 0.61"^^deps:CpanId ].

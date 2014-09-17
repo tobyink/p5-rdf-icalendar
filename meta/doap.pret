@@ -1,0 +1,37 @@
+@prefix :        <http://usefulinc.com/ns/doap#> .
+@prefix cpant:   <http://purl.org/NET/cpan-uri/terms#>.
+
+`RDF-iCalendar`
+	:shortdesc      "convert from RDF to iCalendar"@en;
+	:programming-language  "Perl";
+	:homepage       <https://metacpan.org/release/RDF-iCalendar>;
+	:download-page  <https://metacpan.org/release/RDF-iCalendar>;
+	:bug-database   <http://rt.cpan.org/Dist/Display.html?Queue=RDF-iCalendar>;
+	:repository     [ a :GitRepository; :browse <https://github.com/tobyink/p5-rdf-icalendar> ];
+	cpant:x_IRC     <irc://irc.perl.org/#perlrdf>;
+	:maintainer     cpan:TOBYINK;
+	:developer      cpan:TOBYINK;
+	:documenter     cpan:TOBYINK;
+	:tester         cpan:TOBYINK;
+	:created        "2011-01-21"^^xsd:date;
+	:license        <http://dev.perl.org/licenses/>;
+	:category
+		[ label "RDF"@en ],
+		[ label "Semantic Web"@en ],
+		[ label "SemWeb"@en ],
+		[ label "vCalendar"@en ],
+		[ label "iCalendar"@en ],
+		[ label "iCal"@en ],
+		[ label "Directory"@en ],
+		[ label "Event"@en ],
+		[ label "Todo"@en ],
+		[ label "hCalendar"@en ],
+		[ label "hCal"@en ].
+
+cpan:TOBYINK
+	a               foaf:Person;
+	foaf:name       "Toby Inkster";
+	foaf:homepage   <http://tobyinkster.co.uk/>;
+	foaf:page       <https://metacpan.org/author/TOBYINK>;
+	foaf:mbox       <mailto:tobyink@cpan.org>;
+	owl:sameAs      <http://tobyinkster.co.uk/#i>.
